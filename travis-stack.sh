@@ -12,6 +12,6 @@ fi
 # Build Cabal via Stack(age).
 # ---------------------------------------------------------------------
 
-stack test \
+stack build \
     --no-terminal \
     --resolver "$STACKAGE_RESOLVER"
