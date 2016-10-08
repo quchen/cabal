@@ -71,6 +71,7 @@ else # Stack-based builds
     travis_retry curl -L https://www.stackage.org/stack/linux-x86_64 \
         | tar xz --wildcards --strip-components=1 -C ~/.local/bin '*/stack'
     stack setup --resolver "$STACKAGE_RESOLVER"
+    stack install alex happy --resolver "$STACKAGE_RESOLVER"
 
 fi
 
