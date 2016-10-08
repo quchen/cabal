@@ -14,4 +14,5 @@ fi
 
 stack build \
     --no-terminal \
-    --resolver "$STACKAGE_RESOLVER"
+    --resolver "$STACKAGE_RESOLVER" \
+    --test-arguments "--color always --hide-successes"
