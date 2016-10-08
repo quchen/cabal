@@ -416,16 +416,22 @@ substTopDir topDir ipo
 -- of package DBs and chaos is likely to ensue.
 --
 -- An exception to this is when running cabal from within a `cabal exec`
--- environment. In this case, `cabal exec` will set the
--- CABAL_SANDBOX_PACKAGE_PATH to the same value that it set
--- GHC{,JS}_PACKAGE_PATH to. If that is the case it is OK to allow
--- GHC{,JS}_PACKAGE_PATH.
+-- or `stack` environment.
+--   - In the `cabal exec` case, CABAL_SANDBOX_PACKAGE_PATH will be set to the
+--     same value that it set GHC{,JS}_PACKAGE_PATH to. If that is the case it
+--     is OK to allow GHC{,JS}_PACKAGE_PATH.
+--   - In the `stack` case, Stack will set only the GHC_PACKAGE_PATH, so all we
+--     have to do is to detect whether the script was invoked by stack. We do
+--     this by looking up whether the STACK environment variable is set.
 checkPackageDbEnvVar :: String -> String -> IO ()
 checkPackageDbEnvVar compilerName packagePathEnvVar = do
     mPP <- lookupEnv packagePathEnvVar
     when (isJust mPP) $ do
-        mcsPP <- lookupEnv "CABAL_SANDBOX_PACKAGE_PATH"
-        unless (mPP == mcsPP) abort
+        packagePathsConsistent <- do
+            mcsPP <- lookupEnv "CABAL_SANDBOX_PACKAGE_PATH"
+            pure (mPP == mcsPP)
+        isStackInvoked <- fmap isJust (lookupEnv "STACK_EXE")
+        unless (packagePathsConsistent || isStackInvoked) abort
     where
         lookupEnv :: String -> NoCallStackIO (Maybe String)
         lookupEnv name = (Just `fmap` getEnv name)
